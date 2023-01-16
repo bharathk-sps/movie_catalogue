@@ -3,9 +3,10 @@ import 'package:movie_catalogue/provider/movie_detail_provider.dart';
 import 'package:movie_catalogue/provider/movie_provider.dart';
 import 'package:provider/provider.dart';
 import '../pages/layout.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart' as river;
 
 void main() {
-  runApp(const MyApp());
+  runApp(const river.ProviderScope(child: const MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -27,7 +28,7 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
           primarySwatch: Colors.indigo,
         ),
-        home: const AppLayout(),
+        home: AppLayout(),
         debugShowCheckedModeBanner: false,
       ),
     );

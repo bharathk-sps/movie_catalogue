@@ -1,16 +1,15 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import '../pages/most_popular_page.dart';
 import '../pages/now_playing_page.dart';
 import '../pages/search_page.dart';
 import '../pages/top_chart_page.dart';
 import '../pages/upcoming_page.dart';
 import '../pages/app_search_page.dart';
-
 import '../provider/movie_provider.dart';
-
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import '../widgets/sort_control.dart';
 import '../widgets/profile_section.dart';
 import '../widgets/search_bar.dart';
@@ -19,129 +18,74 @@ import '../widgets/left_pane.dart';
 import '../utils/responsive.dart';
 import '../utils/constants.dart';
 
-class AppLayout extends StatefulWidget {
-  const AppLayout({Key? key}) : super(key: key);
+class AppLayout extends HookConsumerWidget {
+  const AppLayout({super.key});
 
   @override
-  State<AppLayout> createState() => _AppLayoutState();
-}
-
-class _AppLayoutState extends State<AppLayout> {
-  int _currentPage = 0;
-  final _scrollController = ScrollController();
-  final _textEditingController = TextEditingController();
-  List screen = [];
-  bool _isGridView = true;
-
-  @override
-  void initState() {
-    super.initState();
-
-    final movieProvider = Provider.of<MovieProvider>(context, listen: false);
-
-    movieProvider.getNowPlayingMovies(true);
-    movieProvider.getPopularMovies(true);
-    movieProvider.getUpcomingMovies(true);
-    movieProvider.getTopRatedMovies(true);
-
-    screen = [
-      NowPlayingPage(
-        movieData: movieProvider.nowPlayingMovieResults,
-        scrollController: _scrollController,
-        isGridview: _isGridView,
-      ),
-      MostPopularPage(
-        movieData: movieProvider.popularMovieResults,
-        scrollController: _scrollController,
-        isGridview: _isGridView,
-      ),
-      UpcomingPage(
-        movieData: movieProvider.upcomingMovieResults,
-        scrollController: _scrollController,
-        isGridview: _isGridView,
-      ),
-      TopChartPage(
-        movieData: movieProvider.topRatedMovieResults,
-        scrollController: _scrollController,
-        isGridview: _isGridView,
-      ),
-      SearchPage(
-        movieData: movieProvider.searchMovieResults,
-        scrollController: _scrollController,
-        isGridview: _isGridView,
-      )
-    ];
-  }
-
-  @override
-  void didChangeDependencies() {
-    final movieProvider = Provider.of<MovieProvider>(context, listen: false);
-
-    _scrollController.addListener(() {
-      if (_scrollController.position.pixels >=
-              _scrollController.position.maxScrollExtent &&
-          !movieProvider.isLoading) {
-        if (movieProvider.page != movieProvider.moviesModel?.totalPages) {
-          setState(() {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final scrollController = useScrollController();
+    final textController = useTextEditingController();
+    final isGridView = useState(true);
+    final currentPage = useState(0);
+    final screen = useState([]);
+    final movieProvider = ref.watch(movieProviderNotifier);
+    useEffect(() {
+      movieProvider.getNowPlayingMovies(true);
+      movieProvider.getPopularMovies(true);
+      movieProvider.getUpcomingMovies(true);
+      movieProvider.getTopRatedMovies(true);
+      screen.value = [
+        NowPlayingPage(
+          movieData: movieProvider.nowPlayingMovieResults,
+          scrollController: scrollController,
+          isGridview: isGridView.value,
+        ),
+        MostPopularPage(
+          movieData: movieProvider.popularMovieResults,
+          scrollController: scrollController,
+          isGridview: isGridView.value,
+        ),
+        UpcomingPage(
+          movieData: movieProvider.upcomingMovieResults,
+          scrollController: scrollController,
+          isGridview: isGridView.value,
+        ),
+        TopChartPage(
+          movieData: movieProvider.topRatedMovieResults,
+          scrollController: scrollController,
+          isGridview: isGridView.value,
+        ),
+        SearchPage(
+          movieData: movieProvider.searchMovieResults,
+          scrollController: scrollController,
+          isGridview: isGridView.value,
+        )
+      ];
+      scrollController.addListener(() {
+        if (scrollController.position.pixels >=
+                scrollController.position.maxScrollExtent &&
+            !movieProvider.isLoading) {
+          if (movieProvider.page != movieProvider.moviesModel?.totalPages) {
             movieProvider.page++;
-          });
-          if (_currentPage == 0) {
-            movieProvider.getNowPlayingMovies(false);
-          } else if (_currentPage == 1) {
-            movieProvider.getPopularMovies(false);
-          } else if (_currentPage == 2) {
-            movieProvider.getUpcomingMovies(false);
-          } else if (_currentPage == 3) {
-            movieProvider.getTopRatedMovies(false);
-          } else if (_currentPage == 4) {
-            movieProvider.searchMovie(
-              false,
-              _textEditingController.text,
-            );
+            if (currentPage.value == 0) {
+              movieProvider.getNowPlayingMovies(false);
+            } else if (currentPage.value == 1) {
+              movieProvider.getPopularMovies(false);
+            } else if (currentPage.value == 2) {
+              movieProvider.getUpcomingMovies(false);
+            } else if (currentPage.value == 3) {
+              movieProvider.getTopRatedMovies(false);
+            } else if (currentPage.value == 4) {
+              movieProvider.searchMovie(
+                false,
+                textController.text,
+              );
+            }
           }
         }
-      }
-    });
-    super.didChangeDependencies();
-  }
-
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    _textEditingController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final movieProvider = Provider.of<MovieProvider>(context);
-    screen = [
-      NowPlayingPage(
-        movieData: movieProvider.nowPlayingMovieResults,
-        scrollController: _scrollController,
-        isGridview: _isGridView,
-      ),
-      MostPopularPage(
-        movieData: movieProvider.popularMovieResults,
-        scrollController: _scrollController,
-        isGridview: _isGridView,
-      ),
-      UpcomingPage(
-        movieData: movieProvider.upcomingMovieResults,
-        scrollController: _scrollController,
-        isGridview: _isGridView,
-      ),
-      TopChartPage(
-        movieData: movieProvider.topRatedMovieResults,
-        scrollController: _scrollController,
-        isGridview: _isGridView,
-      ),
-      SearchPage(
-        movieData: movieProvider.searchMovieResults,
-        scrollController: _scrollController,
-        isGridview: _isGridView,
-      )
-    ];
+      });
+      return null;
+    }, [textController]);
 
     return Scaffold(
       appBar: ResponsiveWidget.isSmallScreen(context)
@@ -150,8 +94,7 @@ class _AppLayoutState extends State<AppLayout> {
               actions: [
                 IconButton(
                   onPressed: () {
-                    _isGridView = false;
-                    setState(() {});
+                    isGridView.value = false;
                   },
                   icon: const Icon(
                     Icons.view_list,
@@ -159,8 +102,7 @@ class _AppLayoutState extends State<AppLayout> {
                 ),
                 IconButton(
                   onPressed: () {
-                    _isGridView = true;
-                    setState(() {});
+                    isGridView.value = true;
                   },
                   icon: const Icon(
                     Icons.view_module,
@@ -180,7 +122,7 @@ class _AppLayoutState extends State<AppLayout> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => const AppSearchPage(),
+                          builder: (_) =>  AppSearchPage(),
                         ),
                       );
                     },
@@ -201,9 +143,9 @@ class _AppLayoutState extends State<AppLayout> {
           ? Drawer(
               backgroundColor: Colors.indigo.withOpacity(0.80),
               child: LeftPane(
-                selected: _currentPage,
+                selected: currentPage.value,
                 onItemSelect: (value) {
-                  _currentPage = value;
+                  currentPage.value = value;
                 },
               ),
             )
@@ -230,7 +172,7 @@ class _AppLayoutState extends State<AppLayout> {
                         )
 
                       /// Showing only main pane for mobile view
-                      : screen[_currentPage],
+                      : screen.value[currentPage.value],
                 )
 
               /// Main parent row
@@ -242,9 +184,9 @@ class _AppLayoutState extends State<AppLayout> {
                       width: screenWidth(context) * .20,
                       color: Colors.indigo.withOpacity(0.95),
                       child: LeftPane(
-                        selected: _currentPage,
+                        selected: currentPage.value,
                         onItemSelect: (value) {
-                          _currentPage = value;
+                          currentPage.value = value;
                         },
                       ),
                     ),
@@ -259,11 +201,9 @@ class _AppLayoutState extends State<AppLayout> {
                             color: Colors.indigo.withOpacity(0.80),
                             child: Row(
                               children: [
-                                searchBar(_textEditingController, (value) {
-                                  setState(() {
-                                    _currentPage = 4;
-                                    movieProvider.page = 1;
-                                  });
+                                searchBar(textController, (value) {
+                                  currentPage.value = 4;
+                                  movieProvider.page = 1;
                                   movieProvider.searchMovieResults.clear();
                                   movieProvider.searchMovie(true, value);
                                 }),
@@ -279,12 +219,10 @@ class _AppLayoutState extends State<AppLayout> {
                             child: sortControl(
                               context,
                               () {
-                                _isGridView = false;
-                                setState(() {});
+                                isGridView.value = false;
                               },
                               () {
-                                _isGridView = true;
-                                setState(() {});
+                                isGridView.value = true;
                               },
                             ),
                           ),
@@ -296,7 +234,7 @@ class _AppLayoutState extends State<AppLayout> {
                                   ? const CircularProgressIndicator(
                                       color: Colors.indigo,
                                     )
-                                  : screen[_currentPage],
+                                  : screen.value[currentPage.value],
                             ),
                           ),
                         ],

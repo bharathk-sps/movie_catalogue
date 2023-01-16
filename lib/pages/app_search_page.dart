@@ -1,54 +1,35 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import 'package:provider/provider.dart';
 
 import '../pages/search_page.dart';
 import '../provider/movie_provider.dart';
 
-class AppSearchPage extends StatefulWidget {
+class AppSearchPage extends HookConsumerWidget {
   const AppSearchPage({Key? key}) : super(key: key);
 
   @override
-  State<AppSearchPage> createState() => _AppSearchPageState();
-}
-
-class _AppSearchPageState extends State<AppSearchPage> {
-  final _scrollController = ScrollController();
-  final _textEditingController = TextEditingController();
-  @override
-  void initState() {
-    final movieProvider = Provider.of<MovieProvider>(context, listen: false);
-    _scrollController.addListener(() {
-      infiniteScroll(movieProvider);
-    });
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    _textEditingController.dispose();
-    super.dispose();
-  }
-
-  void infiniteScroll(MovieProvider movieProvider) {
-    if (_scrollController.position.pixels >=
-            _scrollController.position.maxScrollExtent &&
-        !movieProvider.isLoading) {
-      if (movieProvider.page != movieProvider.moviesModel?.totalPages) {
-        setState(() {
-          movieProvider.page++;
-          movieProvider.searchMovie(false, _textEditingController.text);
-        });
-      }
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final movieProvider = Provider.of<MovieProvider>(context);
+  Widget build(BuildContext context, WidgetRef ref) {
+    final scrollController = useScrollController();
+    final textController = useTextEditingController();
+    final movieProvider = ref.watch(movieProviderNotifier);
+    useEffect(() {
+      scrollController.addListener(() {
+        if (scrollController.position.pixels >=
+                scrollController.position.maxScrollExtent &&
+            !movieProvider.isLoading) {
+          if (movieProvider.page != movieProvider.moviesModel?.totalPages) {
+            movieProvider.page++;
+            movieProvider.searchMovie(false, textController.text);
+          }
+        }
+      });
+      return null;
+    }, [textController]);
     return Scaffold(
       appBar: AppBar(
         title: Container(
@@ -60,19 +41,18 @@ class _AppSearchPageState extends State<AppSearchPage> {
           ),
           child: Center(
             child: TextField(
-              controller: _textEditingController,
+              controller: textController,
               onChanged: (value) {
                 movieProvider.page = 1;
                 movieProvider.searchMovieResults.clear();
                 movieProvider.searchMovie(true, value);
-                setState(() {});
               },
               decoration: InputDecoration(
                   prefixIcon: const Icon(Icons.search),
                   suffixIcon: IconButton(
                     icon: const Icon(Icons.clear),
                     onPressed: () {
-                      _textEditingController.clear();
+                      textController.clear();
                     },
                   ),
                   hintText: 'Search...',
@@ -94,7 +74,7 @@ class _AppSearchPageState extends State<AppSearchPage> {
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 20.0, sigmaY: 20.0),
           child: Center(
-            child: _textEditingController.text.isEmpty
+            child: textController.text.isEmpty
                 ? const Center(
                     child: Text(
                       'Search Movies',
@@ -110,7 +90,7 @@ class _AppSearchPageState extends State<AppSearchPage> {
                       )
                     : SearchPage(
                         movieData: movieProvider.searchMovieResults,
-                        scrollController: _scrollController,
+                        scrollController: scrollController,
                         isGridview: true,
                       ),
           ),

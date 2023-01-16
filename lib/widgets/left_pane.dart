@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:provider/provider.dart';
 import '../provider/movie_provider.dart';
 import '../widgets/nav_items.dart';
 import '../utils/constants.dart';
 
-class LeftPane extends StatefulWidget {
-  const LeftPane({
+class LeftPane extends HookConsumerWidget {
+  LeftPane({
     required this.selected,
     required this.onItemSelect,
     Key? key,
@@ -13,23 +15,12 @@ class LeftPane extends StatefulWidget {
 
   final int selected;
   final ValueChanged<int> onItemSelect;
-
-  @override
-  State<LeftPane> createState() => _LeftPaneState();
-}
-
-class _LeftPaneState extends State<LeftPane> {
   late int currentPage;
-  @override
-  void initState() {
-    super.initState();
-    currentPage = widget.selected;
-  }
 
   @override
-  Widget build(BuildContext context) {
-    final movieProvider = Provider.of<MovieProvider>(context, listen: false);
-
+  Widget build(BuildContext context, WidgetRef ref) {
+    final movieProvider = ref.watch(movieProviderNotifier);
+    final currentPage = useState(selected);
     return Column(
       children: [
         Container(
@@ -54,59 +45,51 @@ class _LeftPaneState extends State<LeftPane> {
               mainNavItem(
                 screenWidth(context) / 75,
                 () {
-                  setState(() {
-                    currentPage = 0;
-                    widget.onItemSelect(currentPage);
-                    movieProvider.page = 1;
-                    movieProvider.nowPlayingMovieResults.clear();
-                    movieProvider.getNowPlayingMovies(true);
-                  });
+                  currentPage.value = 0;
+                  onItemSelect(currentPage.value);
+                  movieProvider.page = 1;
+                  movieProvider.nowPlayingMovieResults.clear();
+                  movieProvider.getNowPlayingMovies(true);
                 },
-                currentPage == 0,
+                currentPage.value == 0,
                 'Now Playing',
                 Icons.play_circle_fill_outlined,
               ),
               mainNavItem(
                 screenWidth(context) / 75,
                 () {
-                  setState(() {
-                    currentPage = 1;
-                    widget.onItemSelect(currentPage);
-                    movieProvider.page = 1;
-                    movieProvider.popularMovieResults.clear();
-                    movieProvider.getPopularMovies(true);
-                  });
+                  currentPage.value = 1;
+                  onItemSelect(currentPage.value);
+                  movieProvider.page = 1;
+                  movieProvider.popularMovieResults.clear();
+                  movieProvider.getPopularMovies(true);
                 },
-                currentPage == 1,
+                currentPage.value == 1,
                 'Most Popular',
                 Icons.emoji_events_outlined,
               ),
               mainNavItem(
                 screenWidth(context) / 75,
                 () {
-                  setState(() {
-                    currentPage = 2;
-                    widget.onItemSelect(currentPage);
-                    movieProvider.upcomingMovieResults.clear();
-                    movieProvider.getUpcomingMovies(true);
-                  });
+                  currentPage.value = 2;
+                  onItemSelect(currentPage.value);
+                  movieProvider.upcomingMovieResults.clear();
+                  movieProvider.getUpcomingMovies(true);
                 },
-                currentPage == 2,
+                currentPage.value == 2,
                 'Up Coming',
                 Icons.new_releases_outlined,
               ),
               mainNavItem(
                 screenWidth(context) / 75,
                 () {
-                  setState(() {
-                    currentPage = 3;
-                    widget.onItemSelect(currentPage);
-                    movieProvider.page = 1;
-                    movieProvider.topRatedMovieResults.clear();
-                    movieProvider.getTopRatedMovies(true);
-                  });
+                  currentPage.value = 3;
+                  onItemSelect(currentPage.value);
+                  movieProvider.page = 1;
+                  movieProvider.topRatedMovieResults.clear();
+                  movieProvider.getTopRatedMovies(true);
                 },
-                currentPage == 3,
+                currentPage.value == 3,
                 'Top Chart',
                 Icons.diamond_outlined,
               )

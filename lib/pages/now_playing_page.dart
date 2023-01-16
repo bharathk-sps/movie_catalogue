@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import '../models/movies_model.dart';
 import '../widgets/main_pane.dart';
 
-class NowPlayingPage extends StatelessWidget {
+class NowPlayingPage extends HookWidget {
   final List<MovieResults>? movieData;
   final ScrollController scrollController;
   final bool isGridview;

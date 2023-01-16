@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import '../models/movies_model.dart';
 import '../widgets/main_pane.dart';
 
-class SearchPage extends StatefulWidget {
+class SearchPage extends HookWidget {
   final List<MovieResults>? movieData;
   final ScrollController scrollController;
   final bool isGridview;
@@ -15,22 +16,15 @@ class SearchPage extends StatefulWidget {
       : super(key: key);
 
   @override
-  State<SearchPage> createState() => _SearchPageState();
-}
-
-class _SearchPageState extends State<SearchPage> {
-  @override
-  void didChangeDependencies() {
-    widget.isGridview;
-    super.didChangeDependencies();
-  }
-
-  @override
   Widget build(BuildContext context) {
+    useEffect(() {
+      isGridview;
+      return null;
+    });
     return MainPane(
-      movieData: widget.movieData,
-      scrollController: widget.scrollController,
-      isGridview: widget.isGridview,
+      movieData: movieData,
+      scrollController: scrollController,
+      isGridview: isGridview,
     );
   }
 }

@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../utils/constants.dart';
 import '../services/dio_provider.dart';
 import '../models/movies_model.dart';
 import '../services/api_client.dart';
+
+final movieProviderNotifier =
+    ChangeNotifierProvider<MovieProvider>(((ref) => MovieProvider()));
 
 class MovieProvider with ChangeNotifier {
   MoviesModel? moviesModel;
@@ -52,10 +56,10 @@ class MovieProvider with ChangeNotifier {
     });
   }
 
-  getNowPlayingMovies(bool loading) {
+  getNowPlayingMovies(bool loading) async {
     isLoading = loading;
     loadMore = true;
-    client.getNowPlayingMovies(apiKey, page).then((value) {
+    return await client.getNowPlayingMovies(apiKey, page).then((value) {
       moviesModel = value;
       value.results?.forEach((element) {
         nowPlayingMovieResults.add(element);
@@ -63,6 +67,7 @@ class MovieProvider with ChangeNotifier {
       isLoading = false;
       loadMore = false;
       notifyListeners();
+      return nowPlayingMovieResults;
     }).catchError((e) {
       isLoading = false;
       loadMore = false;
