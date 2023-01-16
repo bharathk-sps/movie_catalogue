@@ -122,7 +122,7 @@ class AppLayout extends HookConsumerWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) =>  AppSearchPage(),
+                          builder: (_) => const AppSearchPage(),
                         ),
                       );
                     },

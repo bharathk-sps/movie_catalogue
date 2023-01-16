@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:provider/provider.dart';
 import '../provider/movie_provider.dart';
 import '../widgets/nav_items.dart';
 import '../utils/constants.dart';
 
+// ignore: must_be_immutable
 class LeftPane extends HookConsumerWidget {
   LeftPane({
     required this.selected,

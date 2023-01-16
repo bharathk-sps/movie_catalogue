@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../utils/constants.dart';
 import '../services/dio_provider.dart';
 import '../models/movies_model.dart';
 import '../services/api_client.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 final movieProviderNotifier =
     ChangeNotifierProvider<MovieProvider>(((ref) => MovieProvider()));

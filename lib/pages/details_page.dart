@@ -1,32 +1,23 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../utils/constants.dart';
 import '../provider/movie_detail_provider.dart';
 
-class MovieDetailsPage extends StatefulWidget {
+class MovieDetailsPage extends HookConsumerWidget {
   final int movieId;
   const MovieDetailsPage({required this.movieId, Key? key}) : super(key: key);
 
   @override
-  State<MovieDetailsPage> createState() => _MovieDetailsPageState();
-}
-
-class _MovieDetailsPageState extends State<MovieDetailsPage> {
-  @override
-  void initState() {
-    final movieDetailProvider = context.read<MovieDetailProvider>();
-    movieDetailProvider.getMovieDetails(widget.movieId);
-    movieDetailProvider.getMovieImages(widget.movieId);
-    super.initState();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final movieDetailProvider = Provider.of<MovieDetailProvider>(context);
+  Widget build(BuildContext context, WidgetRef ref) {
+    final movieDetailProvider = ref.watch(movieDetailProviderNotifier);
+    final textController = useTextEditingController();
     final movieDetails = movieDetailProvider.movieDetailModel;
-    final moviePosters = movieDetailProvider.movieImageModel?.posters;
+    useEffect(() {
+      movieDetailProvider.getMovieDetails(movieId);
+      movieDetailProvider.getMovieImages(movieId);
+      return null;
+    }, [textController]);
     return Scaffold(
       body: movieDetailProvider.isLoading
           ? const Center(

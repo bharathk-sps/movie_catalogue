@@ -4,6 +4,10 @@ import '../models/movie_detail_model.dart';
 import '../services/api_client.dart';
 import '../services/dio_provider.dart';
 import '../utils/constants.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+
+final movieDetailProviderNotifier = ChangeNotifierProvider<MovieDetailProvider>(
+    ((ref) => MovieDetailProvider()));
 
 class MovieDetailProvider with ChangeNotifier {
   MovieDetailModel? movieDetailModel;
